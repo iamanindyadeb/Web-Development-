@@ -1,0 +1,67 @@
+export const authConfig = {
+    domain: 'YOUR_AUTH0_DOMAIN',
+    clientId: 'YOUR_CLIENT_ID',
+    redirectUri: window.location.origin
+};
+
+import { Auth0Client } from '@auth0/auth0-spa-js';
+import { AuthConfig } from '@auth0/auth0-spa-js';
+
+const auth0 = new Auth0Client({
+    domain: authConfig.domain,
+    clientId: authConfig.clientId,
+    redirectUri: authConfig.redirectUri,
+});
+
+// Hardcoded user details for demonstration purposes
+const storedUserDetails = {
+    email: 'user@example.com',
+    username: 'exampleUser',
+    password: 'examplePassword'
+};
+
+export async function Login(email: string, username: string, password: string) {
+    if (!email || !username || !password) {
+        alert('Please enter your email, username, and password');
+        return;
+    }
+
+    if (email !== storedUserDetails.email || username !== storedUserDetails.username || password !== storedUserDetails.password) {
+        alert('Invalid email, username, or password');
+        return;
+    } else {
+        // Login Successful
+        console.log('logged in successfully');
+    }
+
+    try {
+        await auth0.loginWithPopup({
+            email,
+            username,
+            password
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function handleRedirectCallback() {
+    await auth0.handleRedirectCallback();
+}
+
+export async function Logout() {
+    const isAuthenticated = await auth0.isAuthenticated();
+
+    if (!isAuthenticated) {
+        alert('User is not logged in');
+        return;
+    }
+
+    try {
+        await auth0.logout({
+            returnTo: window.location.origin
+        });
+    } catch (error) {
+        console.error('Logout failed', error);
+    }
+}
